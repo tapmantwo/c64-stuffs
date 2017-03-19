@@ -66,39 +66,7 @@ handle_movement
   cmp #127
   beq no_move
   rts
- 
-move_left
-  dec $d000
-  dec $d002
-  lda SPRITE_DIRECTION_ADDRESS
-  cmp #SPRITE_LEFT_DIRECTION
-  bne switch_to_left 
-  rts
   
-switch_to_left
-  lda #SPRITE_INTERVAL_WALKING
-  sta SPRITE_CURRENT_INTERVAL
-  jsr reset_frame
-  lda #SPRITE_LEFT_DIRECTION
-  sta SPRITE_DIRECTION_ADDRESS
-  rts
-
-move_right
-  inc $d000
-  inc $d002
-  lda SPRITE_DIRECTION_ADDRESS
-  cmp #SPRITE_RIGHT_DIRECTION
-  bne switch_to_right 
-  rts
-  
-switch_to_right
-  lda #SPRITE_INTERVAL_WALKING
-  sta SPRITE_CURRENT_INTERVAL
-  jsr reset_frame
-  lda #SPRITE_RIGHT_DIRECTION
-  sta SPRITE_DIRECTION_ADDRESS
-  rts
- 
 look_up
   lda SPRITE_DIRECTION_ADDRESS
   cmp #SPRITE_UP_DIRECTION
@@ -120,6 +88,61 @@ switch_to_no_move
   lda #SPRITE_INTERVAL_IDLE
   sta SPRITE_CURRENT_INTERVAL
   lda #SPRITE_NO_DIRECTION
+  sta SPRITE_DIRECTION_ADDRESS
+  rts  
+ 
+move_left
+  dec $d000
+  dec $d002
+  lda $d000
+  cmp #$FF
+  bne move_left_values
+  lda #$0
+  sta $d010
+  jsr move_left_values
+  rts
+  
+move_left_values
+  lda SPRITE_DIRECTION_ADDRESS
+  cmp #SPRITE_LEFT_DIRECTION
+  bne switch_to_left 
+  rts
+  
+switch_to_left
+  lda #SPRITE_INTERVAL_WALKING
+  sta SPRITE_CURRENT_INTERVAL
+  jsr reset_frame
+  lda #SPRITE_LEFT_DIRECTION
+  sta SPRITE_DIRECTION_ADDRESS
+  rts
+
+move_right
+  lda $d000
+  cmp #$FF
+  beq handle_hi_x_right
+  jmp move_right_values
+  rts
+
+handle_hi_x_right
+  lda $d010
+  ora #$03
+  sta $d010
+  jmp move_right_values
+  rts
+  
+move_right_values
+  inc $d000
+  inc $d002
+  lda SPRITE_DIRECTION_ADDRESS
+  cmp #SPRITE_RIGHT_DIRECTION
+  bne switch_to_right
+  rts
+  
+switch_to_right
+  lda #SPRITE_INTERVAL_WALKING
+  sta SPRITE_CURRENT_INTERVAL
+  jsr reset_frame
+  lda #SPRITE_RIGHT_DIRECTION
   sta SPRITE_DIRECTION_ADDRESS
   rts
   
